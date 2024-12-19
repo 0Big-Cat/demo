@@ -1,0 +1,53 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Three.js Scene</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    </head>
+    <body>
+      <script>
+        // 加载场景数据
+        fetch('scene.json')
+          .then(response => response.json())
+          .then(sceneData => {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const loader = new THREE.ObjectLoader();
+            loader.parse(sceneData, (object) => {
+              scene.add(object);
+            });
+
+            // 加载纹理资源
+            scene.traverse((object) => {
+              if (object.material && object.material.map) {
+                const textureURL = 'assets/texture1.jpg'; // 确保纹理路径正确
+                const textureLoader = new THREE.TextureLoader();
+                textureLoader.load(textureURL, (texture) => {
+                  object.material.map = texture;
+                  object.material.needsUpdate = true;
+                });
+              }
+            });
+
+            camera.position.z = 5;
+
+            const animate = () => {
+              requestAnimationFrame(animate);
+              renderer.render(scene, camera);
+            };
+            animate();
+          })
+          .catch(error => {
+            console.error('加载场景数据失败:', error);
+          });
+      </script>
+    </body>
+    </html>
+  
